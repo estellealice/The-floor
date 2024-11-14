@@ -123,7 +123,7 @@
     </style>
 </head>
 <body>
-    <h1>Ignite Youth: The Floor</h1>
+    <h1>The Floor Game Show</h1>
     
     <div class="container">
         <!-- Players Card -->
@@ -170,19 +170,25 @@
 
         // List of 40 players (You can replace these names with actual names)
         const players = [
-            "Player1", "Player2", "Player3", "Player4", "Player5", "Player6", "Player7", "Player8", "Player9", "Player10",
-            "Player11", "Player12", "Player13", "Player14", "Player15", "Player16", "Player17", "Player18", "Player19", "Player20",
-            "Player21", "Player22", "Player23", "Player24", "Player25", "Player26", "Player27", "Player28", "Player29", "Player30",
-            "Player31", "Player32", "Player33", "Player34", "Player35", "Player36", "Player37", "Player38", "Player39", "Player40"
+            "Player1", "Player2", "Player3", "Player4", "Player5",
+            "Player6", "Player7", "Player8", "Player9", "Player10",
+            "Player11", "Player12", "Player13", "Player14", "Player15",
+            "Player16", "Player17", "Player18", "Player19", "Player20",
+            "Player21", "Player22", "Player23", "Player24", "Player25",
+            "Player26", "Player27", "Player28", "Player29", "Player30",
+            "Player31", "Player32", "Player33", "Player34", "Player35",
+            "Player36", "Player37", "Player38", "Player39", "Player40"
         ];
 
         let eliminatedPlayers = [];
         let onStage = [];
 
-        // Function to display players (now initially empty)
+        // Function to display all players
         function displayPlayers() {
             const playersList = document.getElementById('players-list');
-            playersList.innerHTML = ''; // No players displayed initially
+            playersList.innerHTML = players.map(player => 
+                `<div class="list-item ${eliminatedPlayers.includes(player) ? 'eliminated' : ''}">${player}</div>`
+            ).join('');
         }
 
         // Function to pick a random player who isn’t on stage or eliminated
@@ -254,14 +260,18 @@
             document.getElementById('player-count').textContent = `Players left: ${remainingPlayers.length}`;
         }
 
-        // Add event listeners for buttons
-        document.getElementById('pick-player').addEventListener('click', pickPlayer);
+        // Event listeners for buttons
+        document.getElementById('pick-player').addEventListener('click', () => {
+            pickPlayer();
+            updatePlayerCount();
+        });
+
         document.getElementById('pick-topic').addEventListener('click', pickTopic);
+
         document.getElementById('eliminate-player-btn').addEventListener('click', eliminatePlayer);
 
-        // Initial setup
+        // Initialize the game
         displayPlayers();
-        updateEliminateSelect();
         updatePlayerCount();
     </script>
 </body>
