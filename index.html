@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Floor Game Show</title>
+    <style>
+        /* Base Styles */
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #4e54c8, #8f94fb);
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            text-align: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        h1 {
+            color: #ffffff;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+
+        /* Container Styles */
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            width: 90%;
+            max-width: 1200px;
+            padding: 20px;
+        }
+
+        /* Card Styles */
+        .card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 220px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        #stage-container {
+            background-color: #8f94fb;
+            color: #ffffff;
+            font-size: 1.2em;
+        }
+
+        /* Text and Button Styles */
+        .stage-player {
+            font-size: 1.4em;
+            color: #ffffff;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+
+        #topic-display {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #4e54c8;
+            padding: 10px 0;
+        }
+
+        button {
+            padding: 12px 25px;
+            margin-top: 10px;
+            background-color: #4e54c8;
+            color: #ffffff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background-color: #3c44b1;
+        }
+
+        /* Player and Eliminated Lists */
+        .list-item {
+            margin: 8px 0;
+        }
+
+        #players-list .eliminated {
+            color: #999999;
+            text-decoration: line-through;
+        }
+
+        /* Centered Elimination Section */
+        .eliminate-section {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .eliminate-section select {
+            padding: 8px;
+            font-size: 1em;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            margin-top: 10px;
+        }
+
+        /* Player Count Display */
+        #player-count {
+            font-size: 1.2em;
+            color: #ffffff;
+            margin-top: 20px;
+        }
+
+        #winner {
+            font-size: 1.5em;
+            color: #ffcc00;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Ignite Youth: The Floor</h1>
+    
+    <div class="container">
+        <!-- Players Card -->
+        <div id="players-container" class="card">
+            <h2>Players</h2>
+            <div id="players-list" class="list-item"></div>
+        </div>
+
+        <!-- Stage Card -->
+        <div id="stage-container" class="card">
+            <h2>On Stage</h2>
+            <div id="player1" class="stage-player">Player 1</div>
+            <div id="player2" class="stage-player">Player 2</div>
+            <button id="pick-player">Pick Player</button>
+        </div>
+
+        <!-- Topic Card -->
+        <div id="topic-container" class="card">
+            <h2>Random Topic</h2>
+            <div id="topic-display">Topic will appear here</div>
+            <button id="pick-topic">Pick Topic</button>
+        </div>
+    </div>
+
+    <!-- Elimination Section Centered Below Cards -->
+    <div class="eliminate-section">
+        <h2>Eliminate Player</h2>
+        <select id="eliminate-player-select">
+            <option value="">Select a player to eliminate</option>
+        </select>
+        <button id="eliminate-player-btn">Eliminate Player</button>
+    </div>
+
+    <!-- Player Count and Winner Section -->
+    <div id="player-count"></div>
+    <div id="winner"></div>
+
+    <script>
+        // Prevent page refresh or accidental closing
+        window.addEventListener("beforeunload", function (event) {
+            event.preventDefault();
+            event.returnValue = "";
+        });
+
+        // List of 40 players (You can replace these names with actual names)
+        const players = [
+            "Player1", "Player2", "Player3", "Player4", "Player5"
+        ];
+
+        let eliminatedPlayers = [];
+        let onStage = [];
+
+        // Function to display all players
+        function displayPlayers() {
+            const playersList = document.getElementById('players-list');
+            playersList.innerHTML = players.map(player => 
+                `<div class="list-item ${eliminatedPlayers.includes(player) ? 'eliminated' : ''}">${player}</div>`
+            ).join('');
+        }
+
+        // Function to pick a random player who isn’t on stage or eliminated
+        function pickPlayer() {
+            if (onStage.length >= 2) return; // Prevent more than 2 players on stage
+            const availablePlayers = players.filter(player => !eliminatedPlayers.includes(player) && !onStage.includes(player));
+            
+            if (availablePlayers.length === 0) return; // No players left to pick
+            
+            const randomPlayer = availablePlayers[Math.floor(Math.random() * availablePlayers.length)];
+            onStage.push(randomPlayer);
+            updateStage();
+            updateEliminateSelect();
+        }
+
+        // Function to update players on stage
+        function updateStage() {
+            document.getElementById('player1').textContent = onStage[0] || "Waiting...";
+            document.getElementById('player2').textContent = onStage[1] || "Waiting...";
+
+            // Update the winner if only one player is left
+            if (players.filter(player => !eliminatedPlayers.includes(player)).length === 1) {
+                document.getElementById('winner').textContent = `${onStage[0]} is the Winner!`;
+            }
+        }
+
+        // Array of topics for the topic picker
+        const topics = ["Science", "Movies", "History", "Animals", "Geography", "Technology", "Sports", "Literature", "Art", "Music"];
+
+        // Function to pick a random topic
+        function pickTopic() {
+            const randomTopic = topics[Math.floor(Math.random() * topics.length)];
+            document.getElementById('topic-display').textContent = randomTopic;
+        }
+
+        // Function to eliminate a player
+        function eliminatePlayer() {
+            const playerToEliminate = document.getElementById('eliminate-player-select').value;
+            if (playerToEliminate && onStage.includes(playerToEliminate)) {
+                eliminatedPlayers.push(playerToEliminate);
+                onStage = onStage.filter(player => player !== playerToEliminate);
+                updateEliminated();
+                updateStage();
+                updateEliminateSelect();
+                updatePlayerCount(); // Decrease player count after elimination
+            }
+        }
+
+        // Function to display eliminated players and strike out in Players list
+        function updateEliminated() {
+            displayPlayers(); // Update the players list to show strike-through
+        }
+
+        // Function to update the eliminate select options
+        function updateEliminateSelect() {
+            const eliminateSelect = document.getElementById('eliminate-player-select');
+            eliminateSelect.innerHTML = `<option value="">Select a player to eliminate</option>`;
+            onStage.forEach(player => {
+                const option = document.createElement('option');
+                option.value = player;
+                option.textContent = player;
+                eliminateSelect.appendChild(option);
+            });
+        }
+
+        // Function to update the player count display
+        function updatePlayerCount() {
+            const remainingPlayers = players.filter(player => !eliminatedPlayers.includes(player));
+            document.getElementById('player-count').textContent = `Players left: ${remainingPlayers.length}`;
+        }
+
+        // Event listeners for buttons
+        document.getElementById('pick-player').addEventListener('click', () => {
+            pickPlayer();
+            updatePlayerCount();
+        });
+        document.getElementById('pick-topic').addEventListener('click', pickTopic);
+        document.getElementById('eliminate-player-btn').addEventListener('click', eliminatePlayer);
+
+        // Initial setup
+        displayPlayers();
+        updateEliminateSelect();
+        updatePlayerCount();
+    </script>
+</body>
+</html>
